@@ -1,0 +1,185 @@
+<div class="content">
+<div class="row text-center">
+    <div class="col-md-4">
+      <div class="btn-group">
+        <div
+          class="btn btn-primary"
+          mwlCalendarPreviousView
+          [view]="view"
+          [(viewDate)]="viewDate"
+          (viewDateChange)="closeOpenMonthViewDay()"
+        >
+          Previous
+        </div>
+        <div
+          class="btn btn-outline-secondary"
+          mwlCalendarToday
+          [(viewDate)]="viewDate"
+        >
+          Today
+        </div>
+        <div
+          class="btn btn-primary"
+          mwlCalendarNextView
+          [view]="view"
+          [(viewDate)]="viewDate"
+          (viewDateChange)="closeOpenMonthViewDay()"
+        >
+          Next
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <h3>{{ viewDate | calendarDate:(view + 'ViewTitle'):'en' }}</h3>
+    </div>
+    <div class="col-md-4">
+      <div class="btn-group">
+        <div
+          class="btn btn-primary"
+          (click)="setView(CalendarView.Month)"
+          [class.active]="view === CalendarView.Month"
+        >
+          Month
+        </div>
+        <div
+          class="btn btn-primary"
+          (click)="setView(CalendarView.Week)"
+          [class.active]="view === CalendarView.Week"
+        >
+          Week
+        </div>
+        <div
+          class="btn btn-primary"
+          (click)="setView(CalendarView.Day)"
+          [class.active]="view === CalendarView.Day"
+        >
+          Day
+        </div>
+      </div>
+    </div>
+  </div>
+  <br />
+  <div [ngSwitch]="view">
+    <mwl-calendar-month-view
+      *ngSwitchCase="CalendarView.Month"
+      [viewDate]="viewDate"
+      [events]="events"    
+      (dayClicked)="dayClicked($event.day)"
+      (eventTimesChanged)="eventTimesChanged($event)"
+      [cellTemplate]="customCellTemplate"
+    >
+    </mwl-calendar-month-view>
+  <ng-template #customCellTemplate let-day="day" let-locale="locale" 
+      let-tooltipPlacement="tooltipPlacement"
+      let-highlightDay="highlightDay" let-unhighlightDay="unhighlightDay" 
+      let-eventClicked="eventClicked"
+      let-dayClicked='daylicked'
+      let-tooltipTemplate="tooltipTemplate" 
+      let-tooltipAppendToBody="tooltipAppendToBody" let-tooltipDelay="tooltipDelay"
+                  [ngClass]="event?.cssClass" (mwlClick)="eventClicked.emit({event: event})" >
+    <div class="cal-cell-top">
+      <span class="cal-day-badge" *ngIf="day.badgeTotal > 0"
+        >{{ day.badgeTotal }}</span
+      >
+      <span class="cal-day-number"
+        >{{ day.date | calendarDate:'monthViewDayNumber':locale }}</span
+      >
+    </div>
+    <div *ngIf="day.events.length > 0">
+      <div style="margin: 5px;background-color: green;" *ngFor="let event of day.events; trackBy: trackByEventId; index as i" >{{event.time}}-{{ event.title }}
+        <i class="fas fa-fw fa-pencil-alt" (click)="editAction(event)"></i><i class="fas fa-fw fa-trash-alt" (click)="deleteAction(event)"></i></div>
+  <br>
+    </div>
+    
+   
+  </ng-template>
+    <mwl-calendar-week-view
+      *ngSwitchCase="CalendarView.Week"
+      [viewDate]="viewDate"
+      [events]="events"
+      [refresh]="refresh"
+      (eventClicked)="handleEvent('Clicked', $event.event)"
+      (eventTimesChanged)="eventTimesChanged($event)"
+    >
+    </mwl-calendar-week-view>
+    <mwl-calendar-day-view
+      *ngSwitchCase="CalendarView.Day"
+      [viewDate]="viewDate"
+      [events]="events"
+      [refresh]="refresh"
+      (eventClicked)="handleEvent('Clicked', $event.event)"
+      (eventTimesChanged)="eventTimesChanged($event)"
+    >
+    </mwl-calendar-day-view>
+  </div>
+  
+  <!-- Everything you see below is just for the demo, you don't need to include it in your app -->
+  
+  <br /><br /><br />
+  
+  
+  
+ 
+  <ng-template #modalContent let-close="close">
+    <form novalidate #calForm="ngForm" >     
+    <div class="modal-header">
+      <h5 class="modal-title">Event</h5>
+      <button type="button" class="close" (click)="close('close')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group has-error">
+        <label for="title">Title</label>
+        <div class="input-group">
+          <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="event.title"          
+          name="title"
+          required
+          #title="ngModel"
+        />        
+        </div>
+        <div class="error" *ngIf="title.errors?.required">Title is required</div>
+      </div>
+      <div class="form-group has-error">
+        <label for="time">Time</label>
+        <div class="input-group">
+          <input
+        class="form-control"
+        type="time"
+        [(ngModel)]="event.time"        
+        required
+        name="time"        
+        #time="ngModel"
+      />     
+      
+        </div>
+        <div class="error" *ngIf="time.errors?.required">Time is required</div> 
+      </div><div class="form-group has-error">
+        <label for="Location">Location</label>
+        <div class="input-group">
+          <input
+      type="text"
+      class="form-control"
+      [(ngModel)]="event.location"      
+      name="location"
+      required
+      #location="ngModel"
+    />    
+        </div>
+        <div class="error" *ngIf="location.errors?.required">Location is required</div> 
+      </div>
+        
+     
+    </div>
+    <div class="modal-footer">
+      <button type="submit" class="btn btn-outline-secondary" [disabled]="calForm.form.invalid" (click)="close('save')">
+        Save
+      </button>
+    </div> 
+    </form>
+  </ng-template>
+  
+</div>
